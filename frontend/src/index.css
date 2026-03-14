@@ -1,0 +1,246 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap");
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Space Grotesk", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", monospace;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  --radius: 0.9rem;
+  --background: oklch(0.16 0.018 255);
+  --foreground: oklch(0.97 0.01 240);
+  --card: oklch(0.21 0.02 255);
+  --card-foreground: oklch(0.97 0.01 240);
+  --popover: oklch(0.18 0.02 255);
+  --popover-foreground: oklch(0.97 0.01 240);
+  --primary: oklch(0.82 0.12 205);
+  --primary-foreground: oklch(0.18 0.02 255);
+  --secondary: oklch(0.28 0.018 255);
+  --secondary-foreground: oklch(0.96 0.01 240);
+  --muted: oklch(0.26 0.017 255);
+  --muted-foreground: oklch(0.74 0.02 245);
+  --accent: oklch(0.3 0.022 232);
+  --accent-foreground: oklch(0.97 0.01 240);
+  --destructive: oklch(0.68 0.18 24);
+  --border: oklch(1 0.01 240 / 12%);
+  --input: oklch(1 0.01 240 / 14%);
+  --ring: oklch(0.82 0.12 205);
+  --shell-glow-top: rgba(34, 211, 238, 0.12);
+  --shell-glow-bottom: rgba(251, 191, 36, 0.12);
+  --shell-background-start: rgba(2, 6, 23, 0.96);
+  --shell-background-end: rgba(2, 6, 23, 1);
+  --selection-background: rgba(103, 232, 249, 0.22);
+  --selection-foreground: white;
+  --theme-accent-rgb: 103 232 249;
+  --theme-accent-text: rgb(207 250 254);
+  --theme-accent-strong: rgba(103, 232, 249, 0.3);
+  --theme-accent-soft: rgba(103, 232, 249, 0.12);
+  --theme-accent-solid: rgb(103 232 249);
+  --theme-accent-solid-hover: rgb(165 243 252);
+  --theme-hero-end: rgba(15, 23, 42, 0.88);
+  --theme-secondary-glow: rgba(251, 191, 36, 0.14);
+}
+
+:root[data-theme="ocean"] {
+  --primary: oklch(0.82 0.12 205);
+  --accent: oklch(0.3 0.022 232);
+  --ring: oklch(0.82 0.12 205);
+  --shell-glow-top: rgba(34, 211, 238, 0.14);
+  --shell-glow-bottom: rgba(251, 191, 36, 0.12);
+  --selection-background: rgba(103, 232, 249, 0.22);
+}
+
+:root[data-theme="ember"] {
+  --primary: oklch(0.8 0.15 35);
+  --accent: oklch(0.34 0.07 12);
+  --ring: oklch(0.8 0.15 35);
+  --theme-accent-rgb: 251 146 60;
+  --theme-accent-text: rgb(255 237 213);
+  --theme-accent-strong: rgba(251, 146, 60, 0.28);
+  --theme-accent-soft: rgba(251, 146, 60, 0.12);
+  --theme-accent-solid: rgb(251 146 60);
+  --theme-accent-solid-hover: rgb(253 186 116);
+  --shell-glow-top: rgba(251, 146, 60, 0.16);
+  --shell-glow-bottom: rgba(244, 63, 94, 0.14);
+  --shell-background-start: rgba(16, 6, 10, 0.97);
+  --shell-background-end: rgba(24, 10, 8, 1);
+  --selection-background: rgba(251, 146, 60, 0.28);
+  --theme-hero-end: rgba(38, 14, 10, 0.9);
+  --theme-secondary-glow: rgba(244, 63, 94, 0.16);
+}
+
+:root[data-theme="forest"] {
+  --primary: oklch(0.82 0.11 156);
+  --accent: oklch(0.3 0.045 170);
+  --ring: oklch(0.82 0.11 156);
+  --theme-accent-rgb: 74 222 128;
+  --theme-accent-text: rgb(220 252 231);
+  --theme-accent-strong: rgba(74, 222, 128, 0.24);
+  --theme-accent-soft: rgba(74, 222, 128, 0.12);
+  --theme-accent-solid: rgb(74 222 128);
+  --theme-accent-solid-hover: rgb(134 239 172);
+  --shell-glow-top: rgba(74, 222, 128, 0.14);
+  --shell-glow-bottom: rgba(45, 212, 191, 0.12);
+  --shell-background-start: rgba(4, 14, 12, 0.97);
+  --shell-background-end: rgba(5, 18, 15, 1);
+  --selection-background: rgba(74, 222, 128, 0.24);
+  --theme-hero-end: rgba(8, 24, 18, 0.9);
+  --theme-secondary-glow: rgba(45, 212, 191, 0.16);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: var(--font-sans);
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at top left, var(--shell-glow-top), transparent 28%),
+      radial-gradient(circle at bottom right, var(--shell-glow-bottom), transparent 26%),
+      linear-gradient(180deg, var(--shell-background-start), var(--shell-background-end));
+  }
+
+  body.theme-shell {
+    background-attachment: fixed;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    letter-spacing: -0.03em;
+  }
+
+  code,
+  pre,
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+
+  ::selection {
+    background: var(--selection-background);
+    color: var(--selection-foreground);
+  }
+}
+
+@layer components {
+  .theme-shell-overlay {
+    background-image:
+      radial-gradient(circle at top left, rgba(var(--theme-accent-rgb), 0.18), transparent 28%),
+      radial-gradient(circle at bottom right, var(--theme-secondary-glow), transparent 25%),
+      linear-gradient(180deg, rgba(2, 6, 23, 0.2), rgba(2, 6, 23, 0));
+  }
+
+  .theme-hero {
+    background-image:
+      radial-gradient(circle at top left, rgba(var(--theme-accent-rgb), 0.18), transparent 30%),
+      linear-gradient(135deg, var(--shell-background-start), var(--theme-hero-end));
+    box-shadow: 0 25px 50px -12px rgba(var(--theme-accent-rgb), 0.14);
+  }
+
+  .theme-hero-glow {
+    background: radial-gradient(circle at center, var(--theme-secondary-glow), transparent 58%);
+  }
+
+  .theme-accent-badge {
+    background: rgba(var(--theme-accent-rgb), 0.15);
+    color: var(--theme-accent-text);
+  }
+
+  .theme-accent-frame {
+    border-color: rgba(var(--theme-accent-rgb), 0.2);
+    background: rgba(var(--theme-accent-rgb), 0.12);
+    color: var(--theme-accent-text);
+    box-shadow: 0 20px 40px -28px rgba(var(--theme-accent-rgb), 0.3);
+  }
+
+  .theme-accent-surface {
+    border-color: rgba(var(--theme-accent-rgb), 0.18);
+    background: rgba(var(--theme-accent-rgb), 0.08);
+  }
+
+  .theme-accent-surface-strong {
+    border-color: rgba(var(--theme-accent-rgb), 0.24);
+    background: rgba(var(--theme-accent-rgb), 0.12);
+    color: var(--theme-accent-text);
+  }
+
+  .theme-accent-active {
+    border-color: rgba(var(--theme-accent-rgb), 0.3);
+    background: rgba(var(--theme-accent-rgb), 0.12);
+    box-shadow: 0 0 0 1px rgba(var(--theme-accent-rgb), 0.08);
+  }
+
+  .theme-accent-button {
+    background: var(--theme-accent-solid);
+    color: rgb(15 23 42);
+  }
+
+  .theme-accent-button:hover {
+    background: var(--theme-accent-solid-hover);
+  }
+
+  .theme-accent-outline {
+    border-color: rgba(var(--theme-accent-rgb), 0.3);
+    background: rgba(var(--theme-accent-rgb), 0.1);
+    color: var(--theme-accent-text);
+  }
+
+  .theme-accent-outline:hover {
+    background: rgba(var(--theme-accent-rgb), 0.15);
+  }
+
+  .theme-accent-icon {
+    color: var(--theme-accent-text);
+  }
+
+  .theme-accent-text {
+    color: var(--theme-accent-text);
+  }
+
+  .theme-accent-code {
+    color: color-mix(in srgb, var(--theme-accent-text) 88%, white 12%);
+  }
+}
