@@ -1,4 +1,5 @@
 import hashlib
+import secrets
 from datetime import datetime, timezone
 from email.utils import format_datetime, parsedate_to_datetime
 
@@ -92,7 +93,9 @@ def get_subscription(
             profile_id = db_token.profile_id
 
     if profile_id is None:
-        if provided_token != settings.subscription_token:
+        if not provided_token or not secrets.compare_digest(
+            provided_token, settings.subscription_token
+        ):
             raise HTTPException(status_code=401, detail="Invalid subscription token")
         profile_id = get_or_create_default_profile(session).id
 
