@@ -1,6 +1,8 @@
+import secrets
+
+import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-import jwt
 from datetime import datetime, timedelta
 from settings import get_settings
 
@@ -21,7 +23,9 @@ def create_access_token(data: dict):
 @router.post("/token")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     settings = get_settings()
-    if form_data.username != settings.admin_username or form_data.password != settings.admin_password:
+    if not secrets.compare_digest(
+        form_data.username, settings.admin_username
+    ) or not secrets.compare_digest(form_data.password, settings.admin_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
