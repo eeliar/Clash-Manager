@@ -1,4 +1,5 @@
 import threading
+from contextlib import asynccontextmanager
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import Depends, FastAPI
@@ -13,12 +14,27 @@ from settings import get_settings
 
 settings = get_settings()
 
+scheduler = BackgroundScheduler()
+scheduler.add_job(run_tests, "interval", minutes=5)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    settings.validate_runtime()
+    init_db()
+    threading.Thread(target=run_tests, daemon=True).start()
+    scheduler.start()
+    yield
+    scheduler.shutdown()
+
+
 app = FastAPI(
     title=settings.app_name,
     description=(
         "ClashManager is a profile-aware Clash config builder with revision history, "
         "device-scoped subscription delivery, and managed proxy imports."
     ),
+    lifespan=lifespan,
     docs_url="/docs" if settings.enable_api_docs else None,
     openapi_url="/openapi.json" if settings.enable_api_docs else None,
     redoc_url=None,
@@ -41,22 +57,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-scheduler = BackgroundScheduler()
-scheduler.add_job(run_tests, "interval", minutes=5)
-
-
-@app.on_event("startup")
-def on_startup():
-    settings.validate_runtime()
-    init_db()
-    threading.Thread(target=run_tests, daemon=True).start()
-    scheduler.start()
-
-
-@app.on_event("shutdown")
-def on_shutdown():
-    scheduler.shutdown()
 
 
 class StatusResponse(BaseModel):
