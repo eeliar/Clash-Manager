@@ -47,7 +47,7 @@ type DragItem = {
   kind: "proxy" | "target"
   id: number | string
   name: string
-  targetKind?: "group" | "builtin"
+  targetKind?: "group" | "builtin" | "tag"
 }
 
 type GroupForm = {
@@ -137,9 +137,12 @@ function DraggableProxy({ proxy }: { proxy: ProxyConfig }) {
   )
 }
 
-function describeTarget(kind?: "group" | "builtin") {
+function describeTarget(kind?: "group" | "builtin" | "tag") {
   if (kind === "builtin") {
     return "builtin target"
+  }
+  if (kind === "tag") {
+    return "dynamic tag"
   }
   return "selector group"
 }
@@ -321,6 +324,7 @@ export default function Groups() {
   const [proxiesCollapsed, setProxiesCollapsed] = useState(false)
   const [selectorsCollapsed, setSelectorsCollapsed] = useState(false)
   const [builtinsCollapsed, setBuiltinsCollapsed] = useState(false)
+  const [tagsCollapsed, setTagsCollapsed] = useState(false)
 
   const loadPage = async (profileId?: number | null) => {
     const [currentProfile, profileList] = await Promise.all([
@@ -563,6 +567,18 @@ export default function Groups() {
     name: group.name,
     targetKind: "group",
   }))
+  const tagsSet = new Set<string>()
+  proxies.forEach(p => {
+    if (p.tags) {
+      p.tags.split(',').forEach(tag => tagsSet.add(tag))
+    }
+  })
+  const tagTargets: DragItem[] = Array.from(tagsSet).map((tag) => ({
+    kind: "target",
+    id: `tag-${tag}`,
+    name: `tag:${tag}`,
+    targetKind: "tag",
+  }))
   const builtinTargets: DragItem[] = [
     {
       kind: "target",
@@ -737,6 +753,19 @@ export default function Groups() {
                   ))}
                 </InventorySection>
 
+                {tagTargets.length > 0 && (
+                  <InventorySection
+                    title="Dynamic Tags"
+                    count={tagTargets.length}
+                    collapsed={tagsCollapsed}
+                    onToggle={() => setTagsCollapsed((current) => !current)}
+                  >
+                    {tagTargets.map((target) => (
+                      <TargetChip key={target.id} item={target} />
+                    ))}
+                  </InventorySection>
+                )}
+
                 <InventorySection
                   title="Built-In Targets"
                   count={builtinTargets.length}
@@ -799,7 +828,7 @@ function TargetChip({ item }: { item: DragItem }) {
         drag(node)
       }}
       className={`rounded-2xl border border-white/10 p-3 text-white ${
-        item.targetKind === "builtin" ? "bg-amber-300/10" : "theme-accent-surface"
+        item.targetKind === "builtin" ? "bg-amber-300/10" : item.targetKind === "tag" ? "bg-white/10 border-white/20" : "theme-accent-surface"
       } ${
         isDragging ? "opacity-50" : ""
       }`}
@@ -807,7 +836,7 @@ function TargetChip({ item }: { item: DragItem }) {
       <div className="font-medium">{item.name}</div>
       <div
         className={`mt-1 text-xs uppercase tracking-[0.2em] ${
-          item.targetKind === "builtin" ? "text-amber-100/70" : "theme-accent-text"
+          item.targetKind === "builtin" ? "text-amber-100/70" : item.targetKind === "tag" ? "text-white/80" : "theme-accent-text"
         }`}
       >
         {describeTarget(item.targetKind)}

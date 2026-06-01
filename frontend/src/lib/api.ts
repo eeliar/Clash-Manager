@@ -15,6 +15,11 @@ export interface Profile {
   revision_count?: number
   device_count?: number
   token_count?: number
+  external_controller?: string | null
+  external_ui?: string | null
+  secret?: string | null
+  mixed_port?: number | null
+  allow_lan?: boolean | null
 }
 
 export interface Revision {
@@ -143,6 +148,7 @@ export interface ProxyConfig {
   awg_h4?: number | null
   status?: string
   latency?: number | null
+  tags?: string | null
   import_source_id?: number | null
   import_source_key?: string | null
 }
@@ -257,6 +263,11 @@ export async function createProfile(payload: ProfileCreateInput) {
 
 export async function activateProfile(profileId: number) {
   const response = await api.post<Profile>(`/profiles/${profileId}/activate`)
+  return response.data
+}
+
+export async function updateProfile(profileId: number, payload: Partial<Profile>) {
+  const response = await api.put<Profile>(`/profiles/${profileId}`, payload)
   return response.data
 }
 

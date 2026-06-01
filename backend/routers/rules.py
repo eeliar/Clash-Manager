@@ -16,6 +16,7 @@ class RuleUpdate(SQLModel):
     order: int = 0
     profile_id: Optional[int] = None
     comment: Optional[str] = None
+    tags: Optional[str] = None
 
 
 class RuleOrderUpdate(SQLModel):
@@ -72,6 +73,7 @@ def update_rule(rule_id: int, payload: RuleUpdate, session: Session = Depends(ge
     rule.target = payload.target
     rule.order = payload.order
     rule.comment = payload.comment
+    rule.tags = payload.tags
     session.add(rule)
     session.commit()
     session.refresh(rule)

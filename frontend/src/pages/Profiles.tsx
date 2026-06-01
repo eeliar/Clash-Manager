@@ -24,6 +24,7 @@ import {
   listProfiles,
   listProxies,
   listRules,
+  updateProfile,
 } from "@/lib/api"
 import { formatUiDate } from "@/lib/dates"
 import type { Profile, ProxyConfig, ProxyGroup, Revision, RuleEntry } from "@/lib/api"
@@ -39,6 +40,14 @@ export default function ProfilesPage() {
   const [activatingId, setActivatingId] = useState<number | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [copying, setCopying] = useState(false)
+
+  const [externalController, setExternalController] = useState("")
+  const [externalUi, setExternalUi] = useState("")
+  const [secret, setSecret] = useState("")
+  const [mixedPort, setMixedPort] = useState("")
+  const [allowLan, setAllowLan] = useState(false)
+  const [savingSettings, setSavingSettings] = useState(false)
+
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [cloneFromProfileId, setCloneFromProfileId] = useState<number | null>(null)
@@ -88,7 +97,16 @@ export default function ProfilesPage() {
       }
     }
     run()
-  }, [selectedProfileId])
+
+    const profile = profiles.find((p) => p.id === selectedProfileId)
+    if (profile) {
+      setExternalController(profile.external_controller || "")
+      setExternalUi(profile.external_ui || "")
+      setSecret(profile.secret || "")
+      setMixedPort(profile.mixed_port ? String(profile.mixed_port) : "")
+      setAllowLan(profile.allow_lan || false)
+    }
+  }, [selectedProfileId, profiles])
 
   useEffect(() => {
     if (!copySourceProfileId) {
@@ -193,6 +211,27 @@ export default function ProfilesPage() {
       toast.error(error.response?.data?.detail || "Failed to delete profile")
     } finally {
       setDeletingId(null)
+    }
+  }
+
+  const handleSaveSettings = async (event: FormEvent) => {
+    event.preventDefault()
+    if (!selectedProfileId) return
+    try {
+      setSavingSettings(true)
+      await updateProfile(selectedProfileId, {
+        external_controller: externalController.trim() || null,
+        external_ui: externalUi.trim() || null,
+        secret: secret.trim() || null,
+        mixed_port: mixedPort ? Number(mixedPort) : null,
+        allow_lan: allowLan,
+      })
+      await loadProfiles(selectedProfileId)
+      toast.success("Profile settings updated")
+    } catch {
+      toast.error("Failed to update profile settings")
+    } finally {
+      setSavingSettings(false)
     }
   }
 
@@ -490,6 +529,59 @@ export default function ProfilesPage() {
             )}
           </CardContent>
         </Card>
+
+        {selectedProfile && (
+        <Card className="border-white/10 bg-[#101827d6] text-white backdrop-blur">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Layers3 className="theme-accent-icon size-5" />
+                Global / External Config Settings
+              </CardTitle>
+              <CardDescription className="text-slate-300">
+                Configure external controller UI and global properties for {selectedProfile.name}.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSaveSettings} className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-200">External Controller</label>
+                  <Input value={externalController} onChange={e => setExternalController(e.target.value)} placeholder="127.0.0.1:9090" className="border-white/10 bg-black/20 text-white" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-200">External UI</label>
+                  <Input value={externalUi} onChange={e => setExternalUi(e.target.value)} placeholder="ui" className="border-white/10 bg-black/20 text-white" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-200">Secret Token</label>
+                  <Input value={secret} onChange={e => setSecret(e.target.value)} placeholder="your_secret" className="border-white/10 bg-black/20 text-white" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-200">Mixed Port</label>
+                  <Input type="number" value={mixedPort} onChange={e => setMixedPort(e.target.value)} placeholder="7890" className="border-white/10 bg-black/20 text-white" />
+                </div>
+                <div className="space-y-2 md:col-span-2 flex items-center gap-3 py-2">
+                  <input
+                    type="checkbox"
+                    checked={allowLan}
+                    onChange={(e) => setAllowLan(e.target.checked)}
+                    className="size-4 rounded border-white/20 bg-slate-950"
+                    id="allow-lan"
+                  />
+                  <label htmlFor="allow-lan" className="text-sm text-slate-200 cursor-pointer">Allow LAN Connections</label>
+                </div>
+                <div className="md:col-span-2">
+                  <Button
+                    type="submit"
+                    className="theme-accent-button"
+                    disabled={savingSettings}
+                  >
+                    {savingSettings ? "Saving..." : "Save Config Settings"}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+        </Card>
+        )}
 
         <div className="space-y-6">
           <Card className="border-white/10 bg-[#101827d6] text-white backdrop-blur">

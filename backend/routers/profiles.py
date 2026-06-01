@@ -61,6 +61,11 @@ class ProfileSummary(SQLModel):
     revision_count: int = 0
     device_count: int = 0
     token_count: int = 0
+    external_controller: Optional[str] = None
+    external_ui: Optional[str] = None
+    secret: Optional[str] = None
+    mixed_port: Optional[int] = None
+    allow_lan: Optional[bool] = None
 
 
 class ProfileCopyItemsResponse(SQLModel):
@@ -98,6 +103,37 @@ def list_profiles(session: Session = Depends(get_session)):
 )
 def get_current_profile(session: Session = Depends(get_session)):
     return get_or_create_default_profile(session)
+
+
+class ProfileUpdate(SQLModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    external_controller: Optional[str] = None
+    external_ui: Optional[str] = None
+    secret: Optional[str] = None
+    mixed_port: Optional[int] = None
+    allow_lan: Optional[bool] = None
+
+
+@router.put(
+    "/{profile_id}",
+    response_model=ConfigProfile,
+    summary="Update a profile",
+    description="Update a profile, including its external configuration options.",
+)
+def update_profile(profile_id: int, payload: ProfileUpdate, session: Session = Depends(get_session)):
+    profile = session.get(ConfigProfile, profile_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(profile, field, value)
+
+    session.add(profile)
+    session.commit()
+    session.refresh(profile)
+    save_config(session)
+    return profile
 
 
 @router.post(

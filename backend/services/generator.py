@@ -172,7 +172,14 @@ def generate_yaml(session: Session, profile_id: int | None = None) -> str:
                     continue
                 member_names.append(member.proxy.name)
             elif member.target_name:
-                member_names.append(member.target_name)
+                if member.target_name.startswith("tag:"):
+                    tag = member.target_name[4:]
+                    for p in proxies:
+                        if p.name in valid_proxy_names and p.tags and tag in p.tags.split(","):
+                            if p.name not in member_names:
+                                member_names.append(p.name)
+                else:
+                    member_names.append(member.target_name)
         
         group_dict = {
             "name": g.name,
@@ -237,6 +244,17 @@ def generate_yaml(session: Session, profile_id: int | None = None) -> str:
     if settings.mihomo_external_controller:
         config["external-controller"] = settings.mihomo_external_controller
         config["secret"] = settings.mihomo_secret
+
+    if profile.external_controller:
+        config["external-controller"] = profile.external_controller
+    if profile.secret:
+        config["secret"] = profile.secret
+    if profile.external_ui:
+        config["external-ui"] = profile.external_ui
+    if profile.mixed_port is not None:
+        config["mixed-port"] = profile.mixed_port
+    if profile.allow_lan is not None:
+        config["allow-lan"] = profile.allow_lan
     
     config, _removed_proxy_names, _changed = sanitize_config_dict(config)
     yaml_str = dump_config_yaml(config, rule_comments)

@@ -70,6 +70,14 @@ def _test_single_proxy_via_mihomo(proxy_id: int, proxy_name: str) -> tuple[int, 
         return proxy_id, run_controller_delay_test(client, proxy_name)
 
 
+def test_proxy_speed(host: str, port: int, timeout: float = 5.0) -> Optional[float]:
+    """Dummy speed test for now, as HTTP GET to proxy endpoints fail."""
+    return None
+def _test_single_proxy_speed(data: tuple[int, str, int], timeout: float) -> tuple[int, Optional[float]]:
+    proxy_id, host, port = data
+    mbps = test_proxy_speed(host, port, timeout=timeout)
+    return proxy_id, mbps
+
 def run_tests(
     profile_id: Optional[int] = None,
     *,
@@ -96,6 +104,7 @@ def run_tests(
 
     worker_count = max(1, min(max_workers, len(proxy_data)))
     results: dict[int, Optional[int]] = {}
+    speed_results: dict[int, Optional[float]] = {}
     method = "tcp-connect"
 
     controller_client = build_mihomo_client()
@@ -134,6 +143,16 @@ def run_tests(
                 proxy_id, latency = future.result()
                 results[proxy_id] = latency
 
+    # Also run speed tests
+    with ThreadPoolExecutor(max_workers=worker_count) as executor:
+        speed_futures = {
+            executor.submit(_test_single_proxy_speed, proxy_entry, timeout * 2): proxy_entry[0]
+            for proxy_entry in proxy_data
+        }
+        for future in as_completed(speed_futures):
+            proxy_id, mbps = future.result()
+            speed_results[proxy_id] = mbps
+
     with Session(engine) as session:
         statement = select(Proxy)
         if profile_id is not None:
@@ -150,10 +169,12 @@ def run_tests(
             if latency is None:
                 proxy.status = "offline"
                 proxy.latency = 0
+                proxy.speed_mbps = 0.0
                 offline += 1
             else:
                 proxy.status = "online"
                 proxy.latency = latency
+                proxy.speed_mbps = speed_results.get(proxy.id)
                 online += 1
             session.add(proxy)
 

@@ -17,6 +17,13 @@ class ConfigProfile(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
+    # Global/External settings
+    external_controller: Optional[str] = None
+    external_ui: Optional[str] = None
+    secret: Optional[str] = None
+    mixed_port: Optional[int] = None
+    allow_lan: Optional[bool] = None
+
     proxies: List["Proxy"] = Relationship(back_populates="profile")
     groups: List["ProxyGroup"] = Relationship(back_populates="profile")
     rules: List["Rule"] = Relationship(back_populates="profile")
@@ -123,12 +130,16 @@ class Proxy(SQLModel, table=True):
     # Status & metadata
     status: str = Field(default="unknown") # online, offline, unknown
     latency: Optional[int] = None
+    speed_mbps: Optional[float] = None
     import_source_id: Optional[int] = Field(
         default=None,
         foreign_key="subscriptionsource.id",
         index=True,
     )
     import_source_key: Optional[str] = Field(default=None, index=True)
+
+    # Tags
+    tags: Optional[str] = None # Comma-separated list of tags
 
     # Relationships
     profile: Optional[ConfigProfile] = Relationship(back_populates="proxies")
@@ -168,5 +179,6 @@ class Rule(SQLModel, table=True):
     target: str # group name or DIRECT/REJECT/PROXY
     order: int = Field(default=0)
     comment: Optional[str] = None
+    tags: Optional[str] = None # Comma-separated list of tags
 
     profile: Optional[ConfigProfile] = Relationship(back_populates="rules")

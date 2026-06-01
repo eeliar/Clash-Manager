@@ -8,7 +8,9 @@ from services.parser import parse_ss, parse_vless, parse_wireguard
 from services.generator import save_config
 from services.profiles import resolve_profile
 from services.tester import run_tests
+from services.tagging import apply_tags_to_proxy
 
+from services.tagging import apply_tags_to_proxy
 router = APIRouter(prefix="/proxies", tags=["proxies"])
 
 
@@ -88,7 +90,7 @@ def create_proxy(proxy: Proxy, allow_duplicates: bool = False, session: Session 
         existing = find_duplicate_proxy(session, profile.id, proxy)
         if existing:
             raise HTTPException(status_code=400, detail="Proxy already exists")
-            
+    apply_tags_to_proxy(proxy)
     session.add(proxy)
     session.commit()
     session.refresh(proxy)
@@ -150,6 +152,7 @@ def update_proxy(
     proxy.profile_id = profile.id
     proxy.name = assign_unique_proxy_name(session, profile.id, proxy.name, exclude_proxy_id=proxy.id)
 
+    apply_tags_to_proxy(proxy)
     session.add(proxy)
     session.commit()
     session.refresh(proxy)
@@ -183,6 +186,7 @@ def parse_vless_endpoint(
         if existing:
             raise HTTPException(status_code=400, detail="Proxy already exists")
             
+    apply_tags_to_proxy(proxy)
     session.add(proxy)
     session.commit()
     session.refresh(proxy)
@@ -217,6 +221,7 @@ async def parse_wireguard_endpoint(
         if existing:
             raise HTTPException(status_code=400, detail="Proxy already exists")
             
+    apply_tags_to_proxy(proxy)
     session.add(proxy)
     session.commit()
     session.refresh(proxy)
@@ -251,6 +256,7 @@ def parse_ss_endpoint(
         if existing:
             raise HTTPException(status_code=400, detail="Proxy already exists")
 
+    apply_tags_to_proxy(proxy)
     session.add(proxy)
     session.commit()
     session.refresh(proxy)

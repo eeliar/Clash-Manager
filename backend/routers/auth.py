@@ -21,10 +21,13 @@ def create_access_token(data: dict):
 @router.post("/token")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     settings = get_settings()
-    if form_data.username != settings.admin_username or form_data.password != settings.admin_password:
+
+    # Basic check against the database/env
+    valid_creds = form_data.username == settings.admin_username and form_data.password == settings.admin_password
+    if not valid_creds:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail=f"Incorrect username or password. Received: {form_data.username}",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = create_access_token(data={"sub": form_data.username})
